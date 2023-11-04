@@ -1,4 +1,4 @@
-import {View, StyleSheet} from "react-native";
+import {View, StyleSheet, SafeAreaView} from "react-native";
 import React from "react";
 import Animated, {
     Easing,
@@ -7,20 +7,38 @@ import Animated, {
     withTiming
 } from "react-native-reanimated";
 import {CheckMark} from "./CheckMark";
+import { BlurView } from 'expo-blur';
 
 const AnimatedCheckMark = Animated.createAnimatedComponent(CheckMark);
 
 const ANIMATION_DURATION = 2000;
 export const CheckMarkInCircle = () => {
+    /*Gradient*/
+    const gradientPosition = useSharedValue({x: 0, y: 0});
+    gradientPosition.value = withRepeat(withTiming({x: 200, y: 80}, {
+        duration: ANIMATION_DURATION,
+        easing: Easing.linear
+    }), Infinity)
+
+
+    const animatedStyleGradient = useAnimatedStyle(() => {
+        return {
+            transform: [
+                {translateX: gradientPosition.value.x},
+                {translateY: gradientPosition.value.y}
+            ]
+        }
+    })
+
     /*Bouncing checkmark*/
     const scale = useSharedValue(1);
-    scale.value = withRepeat(withTiming(1.2, {
+    scale.value = withRepeat(withTiming(1.3, {
         duration: ANIMATION_DURATION,
         easing: Easing.bounce
     }), Infinity)
 
 
-    const animatedStyle = useAnimatedStyle(() => {
+    const animatedStyleCheckMark = useAnimatedStyle(() => {
         return {
             transform: [
                 {scale: scale.value}
@@ -29,32 +47,26 @@ export const CheckMarkInCircle = () => {
     })
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+                <Animated.View style={[styles.gradientSpot,animatedStyleGradient]} />
+            <BlurView intensity={100} style={StyleSheet.absoluteFill}/>
             <View style={styles.outerCircle}>
                 <View style={styles.innerCircle}>
-                    <Animated.View style={animatedStyle}>
-                        <AnimatedCheckMark style={animatedStyle} height={42} width={42}  />
-                    </Animated.View>
+                    <AnimatedCheckMark style={animatedStyleCheckMark} height={42} width={42}/>
                 </View>
             </View>
             <Animated.Text>Congrats</Animated.Text>
-            {/* Overlay Gradient */}
-            {/*<LinearGradient*/}
-            {/*    colors={['#FDFCFB', 'rgba(255, 218, 185, 0.3)']}*/}
-            {/*    style={styles.gradientSpot}*/}
-            {/*    start={{x: 0, y: 4}}*/}
-            {/*    end={{x: 2, y: 2}}*/}
-            {/*/>*/}
-        </View>
+
+        </SafeAreaView>
     )
 };
 
 const styles = StyleSheet.create({
     container: {
-        ...StyleSheet.absoluteFillObject,
         backgroundColor: "#FDFCFB",
         justifyContent: "space-evenly",
         alignItems: "center",
+        flex: 1,
     },
     innerCircle: {
         width: 100,
@@ -77,6 +89,7 @@ const styles = StyleSheet.create({
         height: 400,
         borderRadius: 200,
         position: "absolute",
-        alignSelf: "center",
+        backgroundColor:'#FCDCC8',
+        top: 100,
     }
 })
