@@ -16,7 +16,8 @@ import {BlurView} from 'expo-blur';
 
 const AnimatedCheckMark = Animated.createAnimatedComponent(CheckMark);
 
-const ANIMATION_DURATION = 3000;
+const ANIMATION_DURATION = 4000;
+const CHECKMARK_ANIMATION_DURATION = 2000;
 
 // Array of texts you want to show
 const textArray = ['Start', 'In Progress', 'Done'];
@@ -68,7 +69,7 @@ export const CheckMarkInCircle = () => {
     /*Bouncing checkmark*/
     const scale = useSharedValue(1);
     scale.value = withRepeat(withTiming(1.3, {
-        duration: ANIMATION_DURATION,
+        duration: CHECKMARK_ANIMATION_DURATION,
         easing: Easing.bounce
     }), Infinity)
 
