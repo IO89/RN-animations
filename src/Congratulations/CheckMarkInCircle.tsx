@@ -1,23 +1,58 @@
-import {View, StyleSheet, SafeAreaView} from "react-native";
+import {SafeAreaView, StyleSheet, View} from "react-native";
 import React from "react";
 import Animated, {
     Easing,
+    Extrapolation,
+    interpolate,
+    runOnJS,
+    useAnimatedReaction,
     useAnimatedStyle,
-    useSharedValue, withRepeat,
+    useSharedValue,
+    withRepeat,
     withTiming
 } from "react-native-reanimated";
 import {CheckMark} from "./CheckMark";
-import { BlurView } from 'expo-blur';
+import {BlurView} from 'expo-blur';
 
 const AnimatedCheckMark = Animated.createAnimatedComponent(CheckMark);
 
-const ANIMATION_DURATION = 2000;
+const ANIMATION_DURATION = 3000;
+
+// Array of texts you want to show
+const textArray = ['Start', 'In Progress', 'Done'];
 export const CheckMarkInCircle = () => {
-    /*Gradient*/
+    /*Text animation based on progress*/
+    const progress = useSharedValue(0);
+    progress.value = withRepeat(withTiming(1, {duration: ANIMATION_DURATION}), Infinity);
+    const updateText = (value: number) => {
+        if (textArray[value] !== undefined) {
+            setText(textArray[value]);
+        }
+    };
+    useAnimatedReaction(
+        () => {
+            return interpolate(
+                progress.value,
+                [0, 0.5, 1],
+                [0, 1, 2],
+                Extrapolation.CLAMP
+            );
+        },
+        (current, previous) => {
+            if (current !== previous) {
+                runOnJS(updateText)(Math.round(current));
+            }
+        }
+    );
+
+    const [text, setText] = React.useState('Start');
+
+
+    /*Gradient circle movement*/
     const gradientPosition = useSharedValue({x: 0, y: 0});
-    gradientPosition.value = withRepeat(withTiming({x: 200, y: 80}, {
+    gradientPosition.value = withRepeat(withTiming({x: 200, y: 250}, {
         duration: ANIMATION_DURATION,
-        easing: Easing.linear
+        easing: Easing.ease
     }), Infinity)
 
 
@@ -48,14 +83,14 @@ export const CheckMarkInCircle = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-                <Animated.View style={[styles.gradientSpot,animatedStyleGradient]} />
+            <Animated.View style={[styles.gradientSpot, animatedStyleGradient]}/>
             <BlurView intensity={100} style={StyleSheet.absoluteFill}/>
             <View style={styles.outerCircle}>
                 <View style={styles.innerCircle}>
                     <AnimatedCheckMark style={animatedStyleCheckMark} height={42} width={42}/>
                 </View>
             </View>
-            <Animated.Text>Congrats</Animated.Text>
+            <Animated.Text>{text}</Animated.Text>
 
         </SafeAreaView>
     )
@@ -89,7 +124,7 @@ const styles = StyleSheet.create({
         height: 400,
         borderRadius: 200,
         position: "absolute",
-        backgroundColor:'#FCDCC8',
+        backgroundColor: '#FCDCC8',
         top: 100,
     }
 })
