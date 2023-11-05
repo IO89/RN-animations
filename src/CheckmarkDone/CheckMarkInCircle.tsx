@@ -68,7 +68,7 @@ export const CheckMarkInCircle = () => {
 
     /*Bouncing checkmark*/
     const scale = useSharedValue(1);
-    scale.value = withRepeat(withTiming(1.3, {
+    scale.value = withRepeat(withTiming(1.5, {
         duration: CHECKMARK_ANIMATION_DURATION,
         easing: Easing.bounce
     }), Infinity)

@@ -1,3 +1,4 @@
 export type Routes = {
-    Congratulations: undefined;
+    CheckmarkDone: undefined;
+    Examples: undefined;
 }
