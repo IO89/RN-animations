@@ -1,84 +1,89 @@
 import {SafeAreaView, StyleSheet, View} from "react-native";
-import React from "react";
+import React, {useEffect} from "react";
 import Animated, {
     Easing,
-    Extrapolation,
-    interpolate,
-    runOnJS,
-    useAnimatedReaction,
     useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
+    useSharedValue, withDelay,
+    withSequence, withSpring,
     withTiming
 } from "react-native-reanimated";
 import {CheckMark} from "./CheckMark";
 import {BlurView} from 'expo-blur';
+import CheckMarkText from "./CheckMarkText";
 
 const AnimatedCheckMark = Animated.createAnimatedComponent(CheckMark);
 
-const ANIMATION_DURATION = 4000;
-const CHECKMARK_ANIMATION_DURATION = 2000;
+const CHECKMARK_ANIMATION_DURATION = 250;
+const GRADIENT_ANIMATION_DURATION = 4000;
+const CHECKMARK_ANIMATION_DELAY = 500;
 
-// Array of texts you want to show
-const textArray = ['Start', 'In Progress', 'Done'];
 export const CheckMarkInCircle = () => {
-    /*Text animation based on progress*/
-    const progress = useSharedValue(0);
-    progress.value = withRepeat(withTiming(1, {duration: ANIMATION_DURATION}), Infinity);
-    const updateText = (value: number) => {
-        if (textArray[value] !== undefined) {
-            setText(textArray[value]);
-        }
-    };
-    useAnimatedReaction(
-        () => {
-            return interpolate(
-                progress.value,
-                [0, 0.5, 1],
-                [0, 1, 2],
-                Extrapolation.CLAMP
-            );
-        },
-        (current, previous) => {
-            if (current !== previous) {
-                runOnJS(updateText)(Math.round(current));
+    const gradientPosition = useSharedValue({ x: 0, y: 0 })
+    const checkMarkScale = useSharedValue(1)
+    const circleScale = useSharedValue(1)
+
+
+    useEffect(() => {
+        /*Gradient circle movement*/
+        gradientPosition.value = withTiming(
+            { x: 200, y: 250 },
+            {
+                duration: GRADIENT_ANIMATION_DURATION,
+                easing: Easing.ease,
             }
-        }
-    );
+        )
+        /*Bouncing checkmark*/
+        checkMarkScale.value = withDelay(
+            CHECKMARK_ANIMATION_DELAY,
+            withSpring(2, {
+                duration: CHECKMARK_ANIMATION_DURATION,
+                overshootClamping: false,
+                dampingRatio: 0.5,
+                stiffness: 100,
+                restDisplacementThreshold: 0.01,
+                restSpeedThreshold: 2,
+            })
+        )
 
-    const [text, setText] = React.useState('Start');
-
-
-    /*Gradient circle movement*/
-    const gradientPosition = useSharedValue({x: 0, y: 0});
-    gradientPosition.value = withRepeat(withTiming({x: 200, y: 250}, {
-        duration: ANIMATION_DURATION,
-        easing: Easing.ease
-    }), Infinity)
+        /* Circle around checkmark */
+        circleScale.value = withDelay(
+            CHECKMARK_ANIMATION_DELAY,
+            withSequence(
+                withTiming(1.5, {
+                    duration: GRADIENT_ANIMATION_DURATION,
+                    easing: Easing.bounce,
+                }),
+                withTiming(1, {
+                    duration: GRADIENT_ANIMATION_DURATION,
+                    easing: Easing.bounce,
+                })
+            )
+        )
+    }, [
+        gradientPosition,
+        checkMarkScale,
+        circleScale,
+    ])
 
 
     const animatedStyleGradient = useAnimatedStyle(() => {
         return {
             transform: [
-                {translateX: gradientPosition.value.x},
-                {translateY: gradientPosition.value.y}
-            ]
+                { translateX: gradientPosition.value.x },
+                { translateY: gradientPosition.value.y },
+            ],
         }
     })
 
-    /*Bouncing checkmark*/
-    const scale = useSharedValue(1);
-    scale.value = withRepeat(withTiming(1.5, {
-        duration: CHECKMARK_ANIMATION_DURATION,
-        easing: Easing.bounce
-    }), Infinity)
-
-
     const animatedStyleCheckMark = useAnimatedStyle(() => {
         return {
-            transform: [
-                {scale: scale.value}
-            ]
+            transform: [{ scale: checkMarkScale.value }],
+        }
+    })
+
+    const animatedStyleCircle = useAnimatedStyle(() => {
+        return {
+            transform: [{ scale: circleScale.value }],
         }
     })
 
@@ -87,12 +92,16 @@ export const CheckMarkInCircle = () => {
             <Animated.View style={[styles.gradientSpot, animatedStyleGradient]}/>
             <BlurView intensity={100} style={StyleSheet.absoluteFill}/>
             <View style={styles.outerCircle}>
-                <View style={styles.innerCircle}>
-                    <AnimatedCheckMark style={animatedStyleCheckMark} height={42} width={42}/>
-                </View>
+                <Animated.View style={[styles.innerCircle, animatedStyleCircle]}>
+                    <AnimatedCheckMark
+                        width={32}
+                        height={32}
+                        color={"white"}
+                        style={animatedStyleCheckMark}
+                    />
+                </Animated.View>
+                <CheckMarkText onAnimationEnd={()=>{}} />
             </View>
-            <Animated.Text>{text}</Animated.Text>
-
         </SafeAreaView>
     )
 };
