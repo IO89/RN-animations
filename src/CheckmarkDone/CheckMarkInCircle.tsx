@@ -100,8 +100,9 @@ export const CheckMarkInCircle = () => {
                         style={animatedStyleCheckMark}
                     />
                 </Animated.View>
-                <CheckMarkText onAnimationEnd={()=>{}} />
+
             </View>
+            <CheckMarkText onAnimationEnd={()=>{}} />
         </SafeAreaView>
     )
 };

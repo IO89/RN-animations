@@ -28,6 +28,7 @@ const CheckMarkText = ({ onAnimationEnd }: Props) => {
         <View style={styles.container}>
             <View style={styles.textContainer}>
                 <Animated.Text
+                    style={styles.text}
                     key={`Text ${text}`}
                     entering={FadeIn.duration(500).delay(500)}
                 >
@@ -49,6 +50,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         position: 'absolute',
     },
+    text: {
+        fontSize: 32,
+    }
 
 })
 export default CheckMarkText
