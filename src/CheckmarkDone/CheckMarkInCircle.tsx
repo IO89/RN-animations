@@ -13,9 +13,9 @@ import CheckMarkText from "./CheckMarkText";
 
 const AnimatedCheckMark = Animated.createAnimatedComponent(CheckMark);
 
-const CHECKMARK_ANIMATION_DURATION = 250;
-const GRADIENT_ANIMATION_DURATION = 4000;
-const CHECKMARK_ANIMATION_DELAY = 500;
+const GRADIENT_ANIMATION_DURATION = 5000
+const CHECKMARK_ANIMATION_DELAY = 250
+const CHECKMARK_ANIMATION_DURATION = 500
 
 export const CheckMarkInCircle = () => {
     const gradientPosition = useSharedValue({ x: 0, y: 0 })
@@ -50,11 +50,11 @@ export const CheckMarkInCircle = () => {
             CHECKMARK_ANIMATION_DELAY,
             withSequence(
                 withTiming(1.5, {
-                    duration: GRADIENT_ANIMATION_DURATION,
+                    duration: CHECKMARK_ANIMATION_DURATION,
                     easing: Easing.bounce,
                 }),
                 withTiming(1, {
-                    duration: GRADIENT_ANIMATION_DURATION,
+                    duration: CHECKMARK_ANIMATION_DURATION,
                     easing: Easing.bounce,
                 })
             )
